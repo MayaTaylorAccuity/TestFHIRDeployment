@@ -16,29 +16,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-      
       - name: create CICDscripts directory 
         run: |
           set -e 
-          mkdir -p /home/accuityGHR/CICDscripts && chmod -R 777 /home/accuityGHR/CICDscripts && cp -r CICDscripts/* /home/accuityGHR/CICDscripts
+          sudo mkdir -p /home/accuityGHR/CICDscripts && sudo chmod -R 777 /home/accuityGHR/CICDscripts && cp -r CICDscripts/* /home/accuityGHR/CICDscripts
       
       - name: create Migrations SQL directory 
         run: |
           set -e 
-          mkdir -p /home/accuityGHR/Migrations && chmod -R 777 /home/accuityGHR/Migrations && cp -r Migrations/* /home/accuityGHR/Migrations/  
+          sudo mkdir -p /home/accuityGHR/Migrations && sudo chmod -R 777 /home/accuityGHR/Migrations && cp -r Migrations/* /home/accuityGHR/Migrations/  
 
       - name: move SQL to be executed 
         run: |
           set -e
-          mkdir -p /home/accuityGHR/sql_stage  && chmod 777 /home/accuityGHR/sql_stage 
-          bash /home/accuityGHR/CICDscripts/MoveMigrationsSqlScripts.sh "/home/accuityGHR/sql_stage"
+          sudo mkdir -p /home/accuityGHR/sql_stage  && sudo chmod 777 /home/accuityGHR/sql_stage 
+          sudo bash /home/accuityGHR/CICDscripts/MoveMigrationsSqlScripts.sh "/home/accuityGHR/sql_stage"
 
       - name: Set up Flyway
         run: |
           set -e
-          mkdir -p /usr/local/bin/flyway
+          sudo mkdir -p /usr/local/bin/flyway
