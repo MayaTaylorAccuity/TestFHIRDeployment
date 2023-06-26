@@ -1,0 +1,70 @@
+name: CI-stage uction
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  # Enable this for additional debug logging
+  ACTIONS_RUNNER_DEBUG: true 
+
+jobs:
+  migrate:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      
+      - name: Download and extract Flyway
+        run: |
+          set -e
+          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.8.1/flyway-commandline-9.8.1-linux-x64.tar.gz | tar xvz
+          if [ ! -f /usr/local/bin/flyway ]; then ln -s `pwd`/flyway-9.8.1/flyway /usr/local/bin/flyway; fi
+      
+      - name: create CICDscripts directory 
+        run: |
+          set -e 
+          mkdir -p /home/accuityGHR/CICDscripts && chmod -R 777 /home/accuityGHR/CICDscripts && cp -r CICDscripts/* /home/accuityGHR/CICDscripts
+      
+      - name: create Migrations SQL directory 
+        run: |
+          set -e 
+          mkdir -p /home/accuityGHR/Migrations && chmod -R 777 /home/accuityGHR/Migrations && cp -r Migrations/* /home/accuityGHR/Migrations/  
+
+      - name: move SQL to be executed 
+        run: |
+          set -e
+          mkdir -p /home/accuityGHR/sql_stage  && chmod 777 /home/accuityGHR/sql_stage 
+          bash /home/accuityGHR/CICDscripts/MoveMigrationsSqlScripts.sh "/home/accuityGHR/sql_stage"
+      
+      - name: Approval
+        id: approval
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { data } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+
+            const approvals = data.requested_reviewers;
+            if (approvals && approvals.length >= 1) {
+              console.log('Approved');
+              process.env.APPROVAL_STATUS = 'Approved';
+            } else {
+              console.log('Not Approved');
+              process.env.APPROVAL_STATUS = 'Not Approved';
+            }
+
+      - name: Set up Flyway
+        run: |
+          set -e
+          chmod +x /usr/local/bin/flyway
