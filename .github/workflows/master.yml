@@ -37,26 +37,6 @@ jobs:
           set -e
           mkdir -p /home/accuityGHR/sql_stage  && chmod 777 /home/accuityGHR/sql_stage 
           bash /home/accuityGHR/CICDscripts/MoveMigrationsSqlScripts.sh "/home/accuityGHR/sql_stage"
-      
-      - name: Approval
-        id: approval
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { data } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            });
-
-            const approvals = data.requested_reviewers;
-            if (approvals && approvals.length >= 1) {
-              console.log('Approved');
-              process.env.APPROVAL_STATUS = 'Approved';
-            } else {
-              console.log('Not Approved');
-              process.env.APPROVAL_STATUS = 'Not Approved';
-            }
 
       - name: Set up Flyway
         run: |
