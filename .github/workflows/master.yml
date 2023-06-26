@@ -22,12 +22,6 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       
-      - name: Download and extract Flyway
-        run: |
-          set -e
-          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.8.1/flyway-commandline-9.8.1-linux-x64.tar.gz | tar xvz
-          if [ ! -f /usr/local/bin/flyway ]; then ln -s `pwd`/flyway-9.8.1/flyway /usr/local/bin/flyway; fi
-      
       - name: create CICDscripts directory 
         run: |
           set -e 
@@ -67,4 +61,4 @@ jobs:
       - name: Set up Flyway
         run: |
           set -e
-          chmod +x /usr/local/bin/flyway
+          mkdir -p /usr/local/bin/flyway
